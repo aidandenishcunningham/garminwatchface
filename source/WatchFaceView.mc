@@ -4,33 +4,16 @@ using Toybox.System as Sys;
 using Toybox.Time as Time;
 using Toybox.Time.Gregorian as Gregorian;
 using Toybox.ActivityMonitor as ActivityMonitor;
-using Toybox.Sensor as Sensor;
-using Toybox.Math as Math;
 
 const DAY_ABBREV = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 class WatchFaceView extends Ui.WatchFace {
-
-    var heading = null; // radians, null until the sensor reports a reading
 
     function initialize() {
         WatchFace.initialize();
     }
 
     function onLayout(dc) {
-    }
-
-    function onShow() {
-        Sensor.enableSensorEvents(method(:onSensorData));
-    }
-
-    function onHide() {
-        Sensor.enableSensorEvents(null);
-    }
-
-    function onSensorData(sensorInfo) {
-        heading = sensorInfo.heading;
-        Ui.requestUpdate();
     }
 
     function onUpdate(dc) {
@@ -47,44 +30,9 @@ class WatchFaceView extends Ui.WatchFace {
         var clock = Sys.getClockTime();
         var greg = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
 
-        drawCompass(dc, width * 0.19, height * 0.19, width * 0.06, white);
         drawDayDate(dc, cx, height, greg, white);
         drawTime(dc, cx, cy, width, clock, white);
         drawBottomRow(dc, cx, width, height, white);
-    }
-
-    function drawCompass(dc, ccx, ccy, r, color) {
-        dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-        dc.setPenWidth(2);
-        dc.drawCircle(ccx, ccy, r);
-        dc.setPenWidth(1);
-
-        // Angle 0 = pointing up (north on screen). When we have a live
-        // heading, rotate the needle opposite to the wrist rotation so it
-        // keeps pointing at magnetic north. Until the sensor reports a
-        // reading, draw it pointing straight up as a static placeholder.
-        var angle = (heading == null) ? 0.0 : -heading;
-        var cosA = Math.cos(angle);
-        var sinA = Math.sin(angle);
-
-        var pts = [
-            [0.0, -r],
-            [r * 0.22, r * 0.15],
-            [0.0, r * 0.45],
-            [-r * 0.22, r * 0.15]
-        ];
-
-        var poly = new [pts.size()];
-        for (var i = 0; i < pts.size(); i++) {
-            var px = pts[i][0];
-            var py = pts[i][1];
-            var rx = (px * cosA) - (py * sinA);
-            var ry = (px * sinA) + (py * cosA);
-            poly[i] = [ccx + rx, ccy + ry];
-        }
-
-        dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-        dc.fillPolygon(poly);
     }
 
     function drawDayDate(dc, cx, height, greg, color) {
