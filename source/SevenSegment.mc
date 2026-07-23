@@ -31,7 +31,7 @@ module SevenSegment {
         if (digit == null || !(DIGIT_SEGMENTS.hasKey(digit))) {
             return;
         }
-        var segs = DIGIT_SEGMENTS.get(digit);
+        var segs = DIGIT_SEGMENTS.get(digit) as Array<Boolean>;
         var midY = y + (h / 2);
         var halfGap = t / 2;
 
@@ -90,10 +90,10 @@ module SevenSegment {
         var total = 0;
         for (var i = 0; i < str.size(); i++) {
             var tok = str[i];
-            if (tok instanceof Number) {
-                total += w;
-            } else {
+            if (tok == :colon || tok == :dash) {
                 total += cw;
+            } else {
+                total += w;
             }
             if (i < str.size() - 1) {
                 total += gap;
@@ -110,15 +110,15 @@ module SevenSegment {
         var cursor = x;
         for (var i = 0; i < str.size(); i++) {
             var tok = str[i];
-            if (tok instanceof Number) {
-                drawDigit(dc, cursor, y, w, h, t, tok, color);
-                cursor += w;
-            } else if (tok == :colon) {
+            if (tok == :colon) {
                 drawColon(dc, cursor, y, cw, h, t, color);
                 cursor += cw;
             } else if (tok == :dash) {
                 drawDash(dc, cursor, y, cw, h, t, color);
                 cursor += cw;
+            } else {
+                drawDigit(dc, cursor, y, w, h, t, tok, color);
+                cursor += w;
             }
             cursor += gap;
         }
